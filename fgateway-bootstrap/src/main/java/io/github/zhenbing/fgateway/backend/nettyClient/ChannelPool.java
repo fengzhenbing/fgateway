@@ -1,10 +1,7 @@
 package io.github.zhenbing.fgateway.backend.nettyClient;
 
  import io.netty.bootstrap.Bootstrap;
- import io.netty.channel.Channel;
- import io.netty.channel.ChannelHandlerContext;
- import io.netty.channel.ChannelOption;
- import io.netty.channel.EventLoopGroup;
+ import io.netty.channel.*;
  import io.netty.channel.nio.NioEventLoopGroup;
  import io.netty.channel.socket.nio.NioSocketChannel;
  import io.netty.handler.codec.http.FullHttpRequest;
@@ -35,7 +32,7 @@ public class ChannelPool {
 
     Channel  channel;
 
-    EventLoopGroup loopGroup   = new NioEventLoopGroup();
+    EventLoopGroup loopGroup   = new NioEventLoopGroup(32);
 
     protected volatile List<Channel> channels = new CopyOnWriteArrayList<Channel>();
 
@@ -92,7 +89,7 @@ public class ChannelPool {
 
         //3)配置
         b.group(loopGroup)
-                //.option(ChannelOption.SO_KEEPALIVE, true)
+                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new LoggingHandler(LogLevel.INFO))
                 .channel(NioSocketChannel.class)
@@ -102,9 +99,13 @@ public class ChannelPool {
             if(channel !=null) {
                 channel.close();
             }
-            channel = b.connect(server.getHost(),server.getPort()).sync().channel();
+            ChannelFuture future  = b.connect(server.getHost(),server.getPort()).sync();
+            channel = future.channel();
+            future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+
         }
 
         return channel;

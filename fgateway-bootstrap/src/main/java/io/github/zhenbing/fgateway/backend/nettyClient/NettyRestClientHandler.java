@@ -42,7 +42,6 @@ public class NettyRestClientHandler extends SimpleChannelInboundHandler<HttpObje
                     }
                 }
             }
-
         }
         if (msg instanceof HttpContent) {
             HttpContent content = (HttpContent) msg;
@@ -59,14 +58,20 @@ public class NettyRestClientHandler extends SimpleChannelInboundHandler<HttpObje
         // 写数据到前端客户端
         fontCtx.writeAndFlush(rltRes);
 
+        //关闭
+        ctx.channel().close();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
+        ctx.channel().close();
         ctx.close();
     }
 
-
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
+    }
 
 }

@@ -27,13 +27,18 @@ public class NettyRestClient2 implements IRestClient {
 
     private HttpFilterChain responseFilterChain;
 
-    private  AtomicInteger requestCnt = new AtomicInteger(0);
+    private Bootstrap bootstrap;
+    private  EventLoopGroup loopGroup;
+    private static   AtomicInteger requestCnt = new AtomicInteger(0);
 
-    private EventLoopGroup loopGroup   = new NioEventLoopGroup();
 
     private Channel channel;
 
+    public NettyRestClient2(){
 
+        loopGroup   = new NioEventLoopGroup(32);
+        logger.info("NettyRestClient2 constructor");
+    }
 
     @Override
     public void request(ChannelHandlerContext frontCtx, FullHttpRequest frontRequest, ILoadBalancer loadBalancer) {
@@ -45,32 +50,29 @@ public class NettyRestClient2 implements IRestClient {
         }
 
         //1)
-         try{
+        try{
+            //2)构造器
+            bootstrap = new  Bootstrap();
+            //3)配置
+            bootstrap.group(loopGroup)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .channel(NioSocketChannel.class)
+                    .handler(new NettyRestClientInitializer(frontCtx,responseFilterChain));
+            channel = bootstrap.connect(backendServer.getHost(),backendServer.getPort()).sync().channel();
 
-             if(channel == null || !channel.isOpen()){
-                 //2)构造器
-                 Bootstrap b = new  Bootstrap();
+            //5）构造请求
+            channel.writeAndFlush(frontRequest.copy());
 
-                 //3)配置
-                 b.group(loopGroup)
-                         //.option(ChannelOption.SO_KEEPALIVE, true)
-                         .option(ChannelOption.TCP_NODELAY, true)
-                         .handler(new LoggingHandler(LogLevel.INFO))
-                         .channel(NioSocketChannel.class)
-                         .handler(new NettyRestClientInitializer(frontCtx,responseFilterChain));
-                 channel = b.connect(backendServer.getHost(),backendServer.getPort()).sync().channel();
-             }
-
-
-             //5）构造请求
-             channel.writeAndFlush(frontRequest.copy());
-
-
-             logger.info("requestCnt -> {}",requestCnt.getAndIncrement());
+            //channel.closeFuture();
+            logger.info("requestCnt -> {}",requestCnt.getAndIncrement());
 
         }catch (Exception e){
             e.printStackTrace();
         }finally {
+
+           // loopGroup.shutdownGracefully();
         }
     }
 

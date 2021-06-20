@@ -16,7 +16,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findById(Integer id) {
         User user = new User(id, "fzb" + id);
-        log.info("find user:", user);
+        log.info("find user:{}", user);
         return user;
     }
 }

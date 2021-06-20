@@ -2,6 +2,7 @@ package io.github.zhenbing.demo.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * @Description

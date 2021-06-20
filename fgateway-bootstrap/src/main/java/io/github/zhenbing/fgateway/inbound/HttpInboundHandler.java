@@ -1,9 +1,11 @@
 package io.github.zhenbing.fgateway.inbound;
 
 import cn.hutool.setting.dialect.PropsUtil;
+import io.github.zhenbing.fgateway.backend.nettyClient.NettyRestClient;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
@@ -27,6 +29,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @Author fzb
  * @date 2020.11.03 11:38
  */
+//@ChannelHandler.Sharable
 public class HttpInboundHandler extends ChannelInboundHandlerAdapter {
     private Logger logger = LoggerFactory.getLogger(HttpInboundHandler.class);
 
