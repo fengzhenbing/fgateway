@@ -11,7 +11,11 @@
 -[ ] filters: request response global
 -[ ] loadbalancer: Random RoundRobin WeightRoundRobin Hash
 -[ ] route
+-[ ] SPI扩展
+-[ ] 注解方式使用
 
+
+### 2，spring boot starter
 
 ```shell
 

@@ -1,5 +1,6 @@
 package io.github.zhenbing.fgateway.backend.nettyClient;
 
+import io.github.zhenbing.fgateway.backend.BaseRequest;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -21,7 +22,6 @@ public class NettyRestClient implements IRestClient {
 
     private Logger logger = LoggerFactory.getLogger(NettyRestClient.class);
 
-    private HttpFilterChain responseFilterChain;
 
     private  AtomicInteger requestCnt = new AtomicInteger(0);
 
@@ -32,20 +32,14 @@ public class NettyRestClient implements IRestClient {
 
 
     @Override
-    public void request(ChannelHandlerContext frontCtx, FullHttpRequest frontRequest, ILoadBalancer loadBalancer) {
-        //负载均衡
-        Server backendServer = loadBalancer.chooseServer(frontRequest);
-        String url =backendServer.getScheme()+"://"+ backendServer.getHost()+":"+backendServer.getPort()+frontRequest.uri();
-        if(logger.isDebugEnabled()){
-            logger.debug("请求后端服务地址为:\n{}",url);
-        }
+    public Object request(BaseRequest baseRequest) {
 
         //1)
          try{
              if(channelPool == null){
                  synchronized (this){
                      if(channelPool ==null){
-                         channelPool = new ChannelPool(backendServer,frontCtx,responseFilterChain);
+                         channelPool = new ChannelPool(null,null,null);
                      }
 
                  }
@@ -55,23 +49,18 @@ public class NettyRestClient implements IRestClient {
              Channel channel =  channelPool.getChannnel();
 
              //5）构造请求
-             channel.writeAndFlush(frontRequest.copy());
+             channel.writeAndFlush(((FullHttpRequest) baseRequest.getHttpRequest()).copy());
 
 
              logger.info("requestCnt -> {}",requestCnt.getAndIncrement());
-
         }catch (Exception e){
             e.printStackTrace();
         }finally {
         }
+
+         return null;
     }
 
-
-
-    @Override
-    public void registerResponseChain(HttpFilterChain responseFilterChain) {
-        this.responseFilterChain = responseFilterChain;
-    }
 
 
 

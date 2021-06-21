@@ -1,7 +1,9 @@
 package io.github.zhenbing.fgateway.inbound;
 
 import cn.hutool.setting.dialect.PropsUtil;
+import io.github.zhenbing.fgateway.backend.BaseRequest;
 import io.github.zhenbing.fgateway.backend.nettyClient.NettyRestClient;
+import io.github.zhenbing.fgateway.loadbalancer.Server;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -44,22 +46,33 @@ public class HttpInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        FullHttpRequest fullRequest = (FullHttpRequest) msg;
+        HttpRequest request = (FullHttpRequest) msg;
         try {
-            //1）调用请求过滤链
+            //1 调用请求过滤链
             if (httpRequestFilterChain != null) {
-                httpRequestFilterChain.invoke(fullRequest, ctx);
+                httpRequestFilterChain.invoke(request, ctx);
             }
 
-            //2）注册响应过滤链
+            //2 请求后端服务
+            //负载均衡
+            Server backendServer = loadBalancer.chooseServer(request);
+            BaseRequest baseRequest = new BaseRequest();
+            baseRequest.setHttpRequest(request);
+            baseRequest.setProtocol(backendServer.getScheme());
+            baseRequest.setHost(backendServer.getHost());
+            baseRequest.setPort(backendServer.getPort());
+            Object result = restClient.request(baseRequest);
+
+            logger.info("result:{}", result);
+
+            //3 调用响应过滤链
             if (httpResponseFilterChain != null) {
-                restClient.registerResponseChain(httpResponseFilterChain);
+                httpResponseFilterChain.invoke((HttpMessage) result, ctx);
             }
 
-            //3 请求后端服务
-            restClient.request(ctx, fullRequest, loadBalancer);
+            ctx.writeAndFlush(result);
 
-            // handleTest(ctx,fullRequest);
+            // handleTest(ctx,request);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

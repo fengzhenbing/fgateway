@@ -93,7 +93,9 @@ public class ChannelPool {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new LoggingHandler(LogLevel.INFO))
                 .channel(NioSocketChannel.class)
-                .handler(new NettyRestClientInitializer(frontCtx,responseFilterChain));
+                .handler(new NettyRestClientInitializer(response -> {
+                    logger.info("response:{}", response);
+                }));
 
         try {
             if(channel !=null) {

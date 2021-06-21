@@ -1,5 +1,6 @@
 package io.github.zhenbing.fgateway.backend.nettyClient;
 
+import io.github.zhenbing.fgateway.backend.BaseRequest;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -14,7 +15,10 @@ import io.github.zhenbing.fgateway.loadbalancer.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @Description
@@ -41,16 +45,13 @@ public class NettyRestClient2 implements IRestClient {
     }
 
     @Override
-    public void request(ChannelHandlerContext frontCtx, FullHttpRequest frontRequest, ILoadBalancer loadBalancer) {
-        //负载均衡
-        Server backendServer = loadBalancer.chooseServer(frontRequest);
-        String url =backendServer.getScheme()+"://"+ backendServer.getHost()+":"+backendServer.getPort()+frontRequest.uri();
-        if(logger.isDebugEnabled()){
-            logger.debug("请求后端服务地址为:\n{}",url);
-        }
+    public Object request(BaseRequest frontRequest) {
+        AtomicReference<Object> result = new AtomicReference<>();
 
         //1)
         try{
+            CountDownLatch latch = new CountDownLatch(1);
+
             //2)构造器
             bootstrap = new  Bootstrap();
             //3)配置
@@ -59,11 +60,16 @@ public class NettyRestClient2 implements IRestClient {
                     .option(ChannelOption.TCP_NODELAY, true)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .channel(NioSocketChannel.class)
-                    .handler(new NettyRestClientInitializer(frontCtx,responseFilterChain));
-            channel = bootstrap.connect(backendServer.getHost(),backendServer.getPort()).sync().channel();
+                    .handler(new NettyRestClientInitializer(response -> {
+                        result.set(response);
+                        latch.countDown();
+                    }));
+            ChannelFuture channelFuture = bootstrap.connect(frontRequest.getHost(),frontRequest.getPort()).sync();
+            channel = channelFuture.channel();
 
             //5）构造请求
-            channel.writeAndFlush(frontRequest.copy());
+            channel.writeAndFlush(((FullHttpRequest) frontRequest.getHttpRequest()).copy());
+            latch.await(5, TimeUnit.SECONDS);
 
             //channel.closeFuture();
             logger.info("requestCnt -> {}",requestCnt.getAndIncrement());
@@ -74,13 +80,7 @@ public class NettyRestClient2 implements IRestClient {
 
            // loopGroup.shutdownGracefully();
         }
-    }
-
-
-
-    @Override
-    public void registerResponseChain(HttpFilterChain responseFilterChain) {
-        this.responseFilterChain = responseFilterChain;
+        return result.get();
     }
 
 

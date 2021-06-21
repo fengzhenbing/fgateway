@@ -16,25 +16,16 @@ import io.github.zhenbing.fgateway.filter.HttpFilterChain;
  */
 public class NettyRestClientInitializer extends ChannelInitializer<SocketChannel> {
 
-    /**
-     * 网关服务端的上下文
-     */
-    private ChannelHandlerContext fontCtx;
+    private ResponseCallBack responseCallBack;
 
-    /**
-     * 响应调用链
-     */
-    private HttpFilterChain responseFilterChain;
 
-    public NettyRestClientInitializer(ChannelHandlerContext frontCtx, HttpFilterChain responseFilterChain) {
-        this.fontCtx = frontCtx;
-        this.responseFilterChain = responseFilterChain;
+    public NettyRestClientInitializer(ResponseCallBack responseCallBack) {
+        this.responseCallBack = responseCallBack;
     }
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline p = ch.pipeline();
-
 
         //客户端http解码
         p.addLast(new HttpClientCodec());
@@ -44,7 +35,7 @@ public class NettyRestClientInitializer extends ChannelInitializer<SocketChannel
         p.addLast(new HttpContentDecompressor());
 
         //解析结果
-        p.addLast(new NettyRestClientHandler(fontCtx, responseFilterChain));
+        p.addLast(new NettyRestClientHandler(responseCallBack));
 
 
     }

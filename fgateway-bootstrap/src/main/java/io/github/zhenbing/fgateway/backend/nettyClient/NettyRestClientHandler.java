@@ -11,19 +11,11 @@ import io.github.zhenbing.fgateway.filter.HttpFilterChain;
  * @date 2020.11.03 20:59
  */
 public class NettyRestClientHandler extends SimpleChannelInboundHandler<HttpObject> {
-    /**
-     * 网关服务端的上下文
-     */
-    private ChannelHandlerContext fontCtx;
 
-    /**
-     * 响应调用链
-     */
-    private HttpFilterChain responseFilterChain;
+    private ResponseCallBack responseCallBack;
 
-    public NettyRestClientHandler(ChannelHandlerContext fontCtx, HttpFilterChain responseFilterChain) {
-        this.fontCtx = fontCtx;
-        this.responseFilterChain = responseFilterChain;
+    public NettyRestClientHandler(ResponseCallBack responseCallBack) {
+        this.responseCallBack = responseCallBack;
     }
 
     @Override
@@ -50,13 +42,7 @@ public class NettyRestClientHandler extends SimpleChannelInboundHandler<HttpObje
 
         }
 
-        // 调用响应过滤链
-        if (responseFilterChain != null) {
-            responseFilterChain.invoke(rltRes, fontCtx);
-        }
-
-        // 写数据到前端客户端
-        fontCtx.writeAndFlush(rltRes);
+        responseCallBack.onReceive(rltRes);
 
         //关闭
         ctx.channel().close();

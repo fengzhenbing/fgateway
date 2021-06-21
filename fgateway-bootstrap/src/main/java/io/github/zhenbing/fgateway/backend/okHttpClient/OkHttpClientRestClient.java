@@ -1,5 +1,6 @@
 package io.github.zhenbing.fgateway.backend.okHttpClient;
 
+import io.github.zhenbing.fgateway.backend.BaseRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -40,10 +41,9 @@ public class OkHttpClientRestClient implements IRestClient {
     private HttpFilterChain responseFilterChain;
 
     @Override
-    public void request(ChannelHandlerContext ctx, FullHttpRequest request, ILoadBalancer loadBalancer) {
+    public Object request(BaseRequest baseRequest) {
         //负载均衡
-        Server backendServer = loadBalancer.chooseServer(request);
-        String url = backendServer.getScheme() + "://" + backendServer.getHost() + ":" + backendServer.getPort() + request.uri();
+        String url = baseRequest.getProtocol() + "://" + baseRequest.getHost() + ":" + baseRequest.getPort() + baseRequest.getHttpRequest().uri();
         if(logger.isDebugEnabled()){
             logger.debug("请求后端服务地址为:\n{}", url);
         }
@@ -62,14 +62,15 @@ public class OkHttpClientRestClient implements IRestClient {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    doWriteResponse(ctx, request, response);
+                    doWriteResponse(response);
                 }
 
             }
         });
+        return null;
     }
 
-    public void doWriteResponse(ChannelHandlerContext ctx, FullHttpRequest fullRequest, Response backendResponse) {
+    public void doWriteResponse(Response backendResponse) {
         ByteBuf content = Unpooled.buffer();
         FullHttpResponse fullHttpResponse = null;
         try {
@@ -89,25 +90,7 @@ public class OkHttpClientRestClient implements IRestClient {
             logger.error("处理接口出错", e);
             fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, NO_CONTENT);
         } finally {
-            if (fullRequest != null) {
-                //1)调用响应的过滤链
-                if (responseFilterChain != null) {
-                    responseFilterChain.invoke(fullHttpResponse, ctx);
-                }
-
-                //2）写数据到前端客户端
-                if (!HttpUtil.isKeepAlive(fullRequest)) {
-                    ctx.write(fullHttpResponse).addListener(ChannelFutureListener.CLOSE);
-                } else {
-                    fullHttpResponse.headers().set(CONNECTION, KEEP_ALIVE);
-                    ctx.writeAndFlush(fullHttpResponse);
-                }
-            }
         }
     }
 
-    @Override
-    public void registerResponseChain(HttpFilterChain responseFilterChain) {
-        this.responseFilterChain = responseFilterChain;
-    }
 }
