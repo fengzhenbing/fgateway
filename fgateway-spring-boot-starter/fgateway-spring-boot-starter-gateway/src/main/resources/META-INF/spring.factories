@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.github.zhenbing.fgateway.springboot.starter.gateway.FGatewayAutoConfiguration

@@ -12,11 +12,14 @@
         <module>fgateway-bootstrap</module>
         <module>fgateway-registry</module>
         <module>fgateway-common</module>
+        <module>fgateway-spring-boot-starter</module>
     </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <spring-boot.version>2.3.3.RELEASE</spring-boot.version>
+        <lombok.version>1.18.12</lombok.version>
     </properties>
 
 </project>

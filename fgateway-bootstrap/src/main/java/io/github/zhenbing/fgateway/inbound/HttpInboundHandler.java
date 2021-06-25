@@ -1,13 +1,11 @@
 package io.github.zhenbing.fgateway.inbound;
 
-import cn.hutool.setting.dialect.PropsUtil;
 import io.github.zhenbing.fgateway.backend.BaseRequest;
-import io.github.zhenbing.fgateway.backend.nettyClient.NettyRestClient;
+import io.github.zhenbing.fgateway.config.FGatewayConfig;
 import io.github.zhenbing.fgateway.loadbalancer.Server;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
@@ -39,8 +37,6 @@ public class HttpInboundHandler extends ChannelInboundHandlerAdapter {
 
     private IRestClient restClient = DEFAULT_REST_CLIENT;
 
-    private ILoadBalancer loadBalancer = new BaseLoadBalancer().rule(PropsUtil.get("server.properties").get("gateway.loadbalancer.rule").toString());
-
     private HttpFilterChain httpRequestFilterChain;
     private HttpFilterChain httpResponseFilterChain;
 
@@ -55,6 +51,7 @@ public class HttpInboundHandler extends ChannelInboundHandlerAdapter {
 
             //2 请求后端服务
             //负载均衡
+            ILoadBalancer loadBalancer = new BaseLoadBalancer().rule(FGatewayConfig.getConfig().getLoadbalancerRule());
             Server backendServer = loadBalancer.chooseServer(request);
             BaseRequest baseRequest = new BaseRequest();
             baseRequest.setHttpRequest(request);

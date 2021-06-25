@@ -1,6 +1,6 @@
 package io.github.zhenbing.fgateway.inbound;
 
-import cn.hutool.setting.dialect.PropsUtil;
+import io.github.zhenbing.fgateway.config.FGatewayConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -11,7 +11,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.github.zhenbing.fgateway.filter.HttpFilterChain;
-import io.github.zhenbing.fgateway.loadbalancer.BaseLoadBalancer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpInboundServer {
 
-    public static final int PORT = Integer.parseInt(System.getProperty("port", PropsUtil.get("server.properties").get("gateway.port").toString()));
     private Logger logger = LoggerFactory.getLogger(HttpInboundInitializer.class);
     private HttpFilterChain httpRequestFilterChain;
     private HttpFilterChain httpResponseFilterChain;
@@ -50,6 +48,7 @@ public class HttpInboundServer {
                     .childHandler(new HttpInboundInitializer(httpRequestFilterChain,httpResponseFilterChain));
 
             // 4、启动器启动
+            Integer PORT = FGatewayConfig.getConfig().getPort();
             ChannelFuture channelFuture = serverBootstrap.bind(PORT).sync();
             logger.info("gateway httpServer start with port : {}", PORT);
 

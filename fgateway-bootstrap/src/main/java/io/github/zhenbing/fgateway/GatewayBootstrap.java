@@ -1,10 +1,14 @@
 package io.github.zhenbing.fgateway;
 
+import io.github.zhenbing.fgateway.config.FGatewayConfig;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.github.zhenbing.fgateway.filter.*;
 import io.github.zhenbing.fgateway.inbound.HttpInboundServer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Description 启动测试类
@@ -13,6 +17,10 @@ import io.github.zhenbing.fgateway.inbound.HttpInboundServer;
  */
 public class GatewayBootstrap {
     public static void main(String[] args) throws InterruptedException {
+        // 配置
+        List<String> backendUrls = new ArrayList<>();
+        backendUrls.add("http://localhost:9000");
+        FGatewayConfig.getConfig().setPort(8887).setBackendUrls(backendUrls).setLoadbalancerRule("RoundRobin").setRestHttpClient("NettyClient");
 
         //配置请求过滤链
         HttpFilterChain requestFilterChain = new BaseHttpFilterChain();

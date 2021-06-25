@@ -1,11 +1,12 @@
 package io.github.zhenbing.fgateway.loadbalancer;
 
-import cn.hutool.setting.dialect.PropsUtil;
+import io.github.zhenbing.fgateway.config.FGatewayConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -26,7 +27,7 @@ public class BaseLoadBalancer implements ILoadBalancer {
     private List<Server> serverList = new CopyOnWriteArrayList<>();
 
     public BaseLoadBalancer() {
-        String urls = PropsUtil.get("server.properties").get("gateway.backendUrls").toString();
+        String urls = FGatewayConfig.getConfig().getBackendUrls().stream().collect(Collectors.joining(","));
         if (urls == null || urls.isEmpty()) {
             String error = "gateway.backendUrls is not configured!";
             logger.error(error);

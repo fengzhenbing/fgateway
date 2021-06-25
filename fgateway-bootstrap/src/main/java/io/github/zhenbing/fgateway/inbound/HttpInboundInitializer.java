@@ -1,6 +1,6 @@
 package io.github.zhenbing.fgateway.inbound;
 
-import cn.hutool.setting.dialect.PropsUtil;
+import io.github.zhenbing.fgateway.config.FGatewayConfig;
 import io.github.zhenbing.fgateway.filter.HttpFilterChain;
 import io.github.zhenbing.fgateway.outbound.HttpOutboundHandler;
 import io.netty.channel.ChannelHandler;
@@ -36,7 +36,7 @@ public class HttpInboundInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new HttpObjectAggregator(1024 * 1024));
 
         //请求后端服务的客户端
-        String restHttpClientName = PropsUtil.get("server.properties").get("gateway.restHttpClient").toString();
+        String restHttpClientName = FGatewayConfig.getConfig().getRestHttpClient();
 
 
         ChannelHandler channelHandler = new HttpInboundHandler()

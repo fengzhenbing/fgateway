@@ -1,13 +1,11 @@
 package io.github.zhenbing.fgateway.backend.nettyClient;
 
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.github.zhenbing.fgateway.filter.HttpFilterChain;
 
 /**
  * @Description

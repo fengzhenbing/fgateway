@@ -1,0 +1,6 @@
+fgateway:
+  port: 8887
+  backend-urls:
+    - http://localhost:9000
+  loadbalancer-rule: RoundRobin
+  restHttpClient: NettyClient
