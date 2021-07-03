@@ -12,6 +12,7 @@
     <artifactId>fgateway-spring-boot-starter</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>fgateway-spring-boot-starter-client</module>
         <module>fgateway-spring-boot-starter-gateway</module>
     </modules>
 

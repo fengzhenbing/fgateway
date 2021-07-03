@@ -13,6 +13,7 @@
         <module>fgateway-registry</module>
         <module>fgateway-common</module>
         <module>fgateway-spring-boot-starter</module>
+        <module>fgateway-client</module>
     </modules>
 
     <properties>
