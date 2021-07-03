@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>demo</artifactId>
+        <artifactId>fgateway-demo</artifactId>
         <groupId>io.github.zhenbing</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>

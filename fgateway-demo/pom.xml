@@ -9,7 +9,7 @@
     </modules>
 
     <groupId>io.github.zhenbing</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>fgateway-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>fgateway-demo</name>
     <description>Demo for FGateway</description>

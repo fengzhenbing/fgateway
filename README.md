@@ -1,18 +1,27 @@
 ### a gateway framework for learning
 
 #### 1.function list
--[ ] server: Netty
--[ ] client:
-    1. -[ ] netty client
-    2. -[ ] OKHttpClient
--[ ] register center
+- [x] server: Netty
+- [x] client:
+    1. -[x] netty client
+    2. -[x] OKHttpClient
+- [ ] register center
     1. -[ ] Zookeeper
     2. -[ ] Nacos
--[ ] filters: request response global
--[ ] loadbalancer: Random RoundRobin WeightRoundRobin Hash
--[ ] route
--[ ] SPI扩展
--[ ] 注解方式使用
+- [ ] filters: 
+    request 
+    response 
+    global 
+    内置的： 熔断限流 权限认证等
+- [ ] loadbalancer: Random RoundRobin WeightRoundRobin Hash
+- [ ] route 
+    1. 代理的路径存储
+    2. 通过断言条件配置： 不同路径走不同的filter
+- [ ] SPI扩展
+- [ ] 注解方式使用
+    代理的后端服务可以通过注解，部分请求走网关，也可以全部走网关
+ 
+- [ ] 页面配置过滤器及断言条件
 
 
 ### 2，spring boot starter

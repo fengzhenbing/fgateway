@@ -1,6 +1,5 @@
 package io.github.zhenbing.fgateway.springboot.starter.gateway;
 
-import io.github.zhenbing.fgateway.GatewayBootstrap;
 import io.github.zhenbing.fgateway.config.FGatewayConfig;
 import io.github.zhenbing.fgateway.filter.AbstractHttpRequestFilter;
 import io.github.zhenbing.fgateway.filter.AbstractHttpResponseFilter;
